@@ -13,6 +13,8 @@
 // iq - box intersection from https://www.iquilezles.org/www/articles/intersectors/intersectors.htm
 // iq - smooth min from https://www.iquilezles.org/www/articles/smin/smin.htm
 
+// Also see a similar shader from dean_the_coder: https://www.shadertoy.com/view/Wd2fzV
+
 #define RAYMARCH_ITER 32
 #define MAX_RAYMARCH_DIST 70.0
 #define SHADOW_STEPS 16
