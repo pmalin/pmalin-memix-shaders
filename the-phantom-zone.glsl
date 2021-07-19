@@ -114,7 +114,7 @@ float hash11(float p)
 //  3 out, 2 in...
 vec3 hash32(vec2 p)
 {
-	vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
+    vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
     p3 += dot(p3, p3.yxz+33.33);
     return fract((p3.xxy+p3.yzz)*p3.zyx);
 }
@@ -122,25 +122,26 @@ vec3 hash32(vec2 p)
 
 float SmoothNoise( vec2 o ) 
 {
-	vec2 p = floor(o);
-	vec2 f = fract(o);
-		
-	float n = p.x + p.y*57.0;
+    //vec2 p = floor(o);
+    vec2 f = fract(o);
+    vec2 p = o-f;
+        
+    float n = p.x + p.y*57.0;
 
-	float a = hash11(n+  0.0);
-	float b = hash11(n+  1.0);
-	float c = hash11(n+ 57.0);
-	float d = hash11(n+ 58.0);
-	
-	vec2 f2 = f * f;
-	vec2 f3 = f2 * f;
-	
-	vec2 t = 3.0 * f2 - 2.0 * f3;
-	
-	float u = t.x;
-	float v = t.y;
+    float a = hash11(n+  0.0);
+    float b = hash11(n+  1.0);
+    float c = hash11(n+ 57.0);
+    float d = hash11(n+ 58.0);
+    
+    vec2 f2 = f * f;
+    vec2 f3 = f2 * f;
+    
+    vec2 t = 3.0 * f2 - 2.0 * f3;
+    
+    float u = t.x;
+    float v = t.y;
 
-	float res = a + (b-a)*u +(c-a)*v + (a-b+d-c)*u*v;
+    float res = a + (b-a)*u +(c-a)*v + (a-b+d-c)*u*v;
     
     return res;
 }
@@ -181,35 +182,35 @@ float GetSlice( float h )
 
 struct RaymarchResult
 {
-	float dist;
-	int objectId;
+    float dist;
+    int objectId;
     vec3 uvw;
 };
 
 RaymarchResult Scene_GetDistance( vec3 pos );
 
 RaymarchResult Scene_Raymarch( Ray ray, float minDist, float maxDist )
-{	
+{   
     RaymarchResult result;
     result.dist = 0.0;
     result.uvw = vec3(0.0);
     result.objectId = MAT_NONE;
     
-	float t = minDist;
+    float t = minDist;
     
-	for(int i=0; i<RAYMARCH_ITER; i++)
-	{		
+    for(int i=0; i<RAYMARCH_ITER; i++)
+    {       
         float epsilon = 0.000001 * t;
-		result = Scene_GetDistance( ray.pos + ray.dir * t );
+        result = Scene_GetDistance( ray.pos + ray.dir * t );
         if ( abs(result.dist) < epsilon )
-		{
-			break;
-		}
+        {
+            break;
+        }
                         
         if ( t > maxDist )
         {
             result.objectId = MAT_NONE;
-	        t = maxDist;
+            t = maxDist;
             break;
         }       
         
@@ -219,7 +220,7 @@ RaymarchResult Scene_Raymarch( Ray ray, float minDist, float maxDist )
         }    
         
         t += result.dist; 
-	}
+    }
     
     result.dist = max( t, minDist );
 
@@ -253,8 +254,8 @@ vec3 Scene_GetNormal(vec3 pos)
 
 struct TraceResult
 {
-	float dist;
-	int objectId;
+    float dist;
+    int objectId;
     vec3 uvw;
     vec3 pos;    
     vec3 normal;
@@ -362,13 +363,13 @@ float Scene_TraceShadow( Ray ray, float minDist, float lightDist )
     // https://www.shadertoy.com/view/lsKcDD    
     // based on Sebastian Aaltonen's soft shadow improvement
     
-	float res = 1.0;
+    float res = 1.0;
     float t = minDist;
     float ph = 1e10; // big, such that y = 0 on the first iteration
         
     for( int i=0; i<SHADOW_STEPS; i++ )
     {
-		float h = Scene_GetDistance( ray.pos + ray.dir * t ).dist;
+        float h = Scene_GetDistance( ray.pos + ray.dir * t ).dist;
 
         // use this if you are getting artifact on the first iteration, or unroll the
         // first iteration out of the loop
@@ -423,20 +424,20 @@ struct SurfaceLighting
 
 float Light_GIV( float dotNV, float k)
 {
-	return 1.0 / ((dotNV + 0.0001) * (1.0 - k)+k);
+    return 1.0 / ((dotNV + 0.0001) * (1.0 - k)+k);
 }
 
 float AlphaSqrFromGloss( float gloss )
 {
-	float MAX_SPEC = 10.0;
-	return 2.0f  / ( 2.0f + exp2( gloss * MAX_SPEC) );
+    float MAX_SPEC = 10.0;
+    return 2.0f  / ( 2.0f + exp2( gloss * MAX_SPEC) );
 }
     
 void Light_Add( inout SurfaceLighting lighting, SurfaceInfo surface, vec3 viewDir, vec3 lightDir, vec3 lightColour )
 {
-	float NDotL = clamp(dot(lightDir, surface.normal), 0.0, 1.0);
-	
-	lighting.diffuse += lightColour * NDotL;
+    float NDotL = clamp(dot(lightDir, surface.normal), 0.0, 1.0);
+    
+    lighting.diffuse += lightColour * NDotL;
 
     if ( surface.gloss > 0.0 )
     {
@@ -460,14 +461,14 @@ void Light_Add( inout SurfaceLighting lighting, SurfaceInfo surface, vec3 viewDi
 }
 
 void Light_AddDirectional(inout SurfaceLighting lighting, SurfaceInfo surface, vec3 viewDir, vec3 lightDir, vec3 lightColour)
-{	
-	float attenuation = 1.0;
+{   
+    float attenuation = 1.0;
     Ray shadowRay;
     shadowRay.pos = surface.pos + surface.normal * 0.001;
     shadowRay.dir = lightDir;
-	float shadowFactor = Scene_TraceShadow( shadowRay, 0.01, 10.0 );
-	
-	Light_Add( lighting, surface, viewDir, lightDir, lightColour * shadowFactor * attenuation);
+    float shadowFactor = Scene_TraceShadow( shadowRay, 0.01, 10.0 );
+    
+    Light_Add( lighting, surface, viewDir, lightDir, lightColour * shadowFactor * attenuation);
 }
 
 SurfaceLighting Scene_GetSurfaceLighting( Ray ray, SurfaceInfo surfaceInfo );
@@ -486,18 +487,18 @@ vec3 Env_ApplyAtmosphere( vec3 colour, Ray ray, float dist );
 
 vec3 Scene_GetColour( Ray ray )
 {
-	vec3 resultColor = vec3(0.0);
+    vec3 resultColor = vec3(0.0);
             
-	TraceResult firstTraceResult;
+    TraceResult firstTraceResult;
     
     float startDist = 0.0f;
     float maxDist = MAX_RAYMARCH_DIST;
     
     vec3 remaining = vec3(1.0);
     
-	for( int passIndex=0; passIndex < 2; passIndex++ )
+    for( int passIndex=0; passIndex < 2; passIndex++ )
     {
-    	TraceResult traceResult = Scene_Trace( ray, startDist, maxDist );
+        TraceResult traceResult = Scene_Trace( ray, startDist, maxDist );
 
         if ( passIndex == 0 )
         {
@@ -507,10 +508,10 @@ vec3 Scene_GetColour( Ray ray )
         vec3 colour = vec3(0);
         vec3 reflectAmount = vec3(0);
         
-		if( traceResult.objectId < 0 )
-		{
+        if( traceResult.objectId < 0 )
+        {
             colour = Env_GetSkyColor( ray );
-			colour = Env_ApplyAtmosphere( colour, ray, traceResult.dist );
+            colour = Env_ApplyAtmosphere( colour, ray, traceResult.dist );
         }
         else
         {
@@ -527,8 +528,8 @@ vec3 Scene_GetColour( Ray ray )
                 // calculate reflectance (Fresnel)
                 reflectAmount = Light_GetFresnel( -ray.dir, surfaceInfo.normal, surfaceInfo.r0, surfaceInfo.gloss );            
             }
-			
-			colour = (surfaceInfo.albedo * surfaceLighting.diffuse + surfaceInfo.emissive) * (vec3(1.0) - reflectAmount); 
+            
+            colour = (surfaceInfo.albedo * surfaceLighting.diffuse + surfaceInfo.emissive) * (vec3(1.0) - reflectAmount); 
             
             vec3 reflectRayOrigin = surfaceInfo.pos;
             vec3 reflectRayDir = normalize( reflect( ray.dir, surfaceInfo.normal ) );
@@ -536,7 +537,7 @@ vec3 Scene_GetColour( Ray ray )
 
             colour += surfaceLighting.specular * reflectAmount;            
 
-			colour = Env_ApplyAtmosphere( colour, ray, traceResult.dist );
+            colour = Env_ApplyAtmosphere( colour, ray, traceResult.dist );
             
             ray.pos = reflectRayOrigin;
             ray.dir = reflectRayDir;
@@ -638,15 +639,15 @@ SurfaceInfo Scene_GetSurfaceInfo( Ray ray, TraceResult traceResult )
     if ( traceResult.objectId == MAT_DEFAULT )
     {
         surfaceInfo.albedo = vec3(0.95, 0.95, 0.95); 
-	    surfaceInfo.gloss = 0.0;
-    	surfaceInfo.r0 = vec3( 0.02 );
+        surfaceInfo.gloss = 0.0;
+        surfaceInfo.r0 = vec3( 0.02 );
     }
     
     if ( traceResult.objectId == MAT_QUAD )
     {
         surfaceInfo.albedo = vec3(0);
-	    surfaceInfo.gloss = 0.9;
-    	surfaceInfo.r0 = vec3( 0.02 );
+        surfaceInfo.gloss = 0.9;
+        surfaceInfo.r0 = vec3( 0.02 );
         
         
         vec3 dir = refract( ray.dir, surfaceInfo.normal, 1.0 / 1.33 );
@@ -667,7 +668,14 @@ SurfaceInfo Scene_GetSurfaceInfo( Ray ray, TraceResult traceResult )
         
         ivec2 tSize = textureSize(iChannel0, 0);
         uv = uv - 0.5;
-        uv.x *= float(tSize.y) / float(tSize.x);
+        if ( tSize.x > tSize.y )
+        {
+            uv.x *= float(tSize.y) / float(tSize.x);
+        }
+        else
+        {
+            uv.y *= float(tSize.x) / float(tSize.y);
+        }
         uv = uv + 0.5;
         
         vec3 emissiveSample = texture( iChannel0, uv ).rgb;
@@ -708,20 +716,20 @@ float Env_GetFogFactor( Ray ray, float dist )
 
     float fogAmount = fogDensity * exp(-ray.pos.y*fogHeightFalloff) * (1.0-exp(-dist*ray.dir.y*fogHeightFalloff ))/ray.dir.y;
     
-	return exp(dist * -fogAmount);	    
+    return exp(dist * -fogAmount);      
 }
 
 vec3 Env_GetFogColour(Ray ray)
 {    
-	return vec3(0.1, 0.35, 0.9);
+    return vec3(0.1, 0.35, 0.9);
 }
 
 vec3 Env_ApplyAtmosphere( vec3 colour, Ray ray, float dist )
 {
     vec3 result = colour;
         
-	float fogFactor = Env_GetFogFactor( ray, dist );
-	vec3 fogColor = Env_GetFogColour( ray );
+    float fogFactor = Env_GetFogFactor( ray, dist );
+    vec3 fogColor = Env_GetFogColour( ray );
     result = mix( fogColor, result, fogFactor );
 
     return result;
